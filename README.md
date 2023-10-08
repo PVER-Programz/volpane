@@ -1,2 +1,2 @@
 # volpane
-App hiding volume panel lol
+Virtual Workspaces shifter disguised as a Volume Panel
