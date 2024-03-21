@@ -390,21 +390,23 @@ def rpc():
 	rpcgui.mainloop()
 
 def sticky(e=None):
+	stickyfile="sticky"
 	def sticky_save(e=None):
 		appdata = environ["appdata"]
 		try:
 			makedirs(f"{appdata}\\VolumePanel\\data")
 		except FileExistsError:
 			pass
-		with open(f"{appdata}/VolumePanel/data/sticky.PVER", "wt") as f:
+		with open(f"{appdata}/VolumePanel/data/{stickyfile}.PVER", "wt") as f:
 			f.write(area.get(0.1, END).strip())
-		stickyWin.title("Sticky")
+		stickyWin.title(f"Sticky - {stickyfile}")
 
 	def sticky_load():
+		stickyWin.title(f"Sticky - {stickyfile}")
 		area.delete(1.0, END)
 		appdata = environ["appdata"]
-		if path.isfile(f"{appdata}/VolumePanel/data/sticky.PVER"):
-			with open(f"{appdata}/VolumePanel/data/sticky.PVER", "rt") as f:
+		if path.isfile(f"{appdata}/VolumePanel/data/{stickyfile}.PVER"):
+			with open(f"{appdata}/VolumePanel/data/{stickyfile}.PVER", "rt") as f:
 				area.insert(INSERT, f.read())
 				if area.get(1.0, END).strip() is "":
 					stickyWin.config(bg="white")
@@ -414,18 +416,21 @@ def sticky(e=None):
 		else:
 			showerror("Nope !!", "Sticky not saved to load")
 
+	def cmd_load():
+		pass
+
 	def sticky_close(e=None):
 		pcopy(area.get(0.1, END).strip())
 		stickyWin.destroy()
 
 	def unsaved_notice(e=None):
 		appdata = environ["appdata"]
-		if path.isfile(f"{appdata}/VolumePanel/data/sticky.PVER"):
-			with open(f"{appdata}/VolumePanel/data/sticky.PVER", "rt") as f:
+		if path.isfile(f"{appdata}/VolumePanel/data/{stickyfile}.PVER"):
+			with open(f"{appdata}/VolumePanel/data/{stickyfile}.PVER", "rt") as f:
 				if f.read() is area.get("0.0", END):
-					stickyWin.title("Sticky")
+					stickyWin.title(f"Sticky - {stickyfile}")
 				else:
-					stickyWin.title("!! Sticky !!")
+					stickyWin.title(f"** Sticky - {stickyfile}")
 
 	def do_popup(event):
 		try:
@@ -437,14 +442,20 @@ def sticky(e=None):
 		sticky_close()
 		func()
 
+	def switch_load(fname):
+		nonlocal stickyfile
+		print("Loaded", fname)
+		stickyfile=fname
+		sticky_load()
+
 
 	stickyWin = Toplevel(root)
 	stickyWin.iconbitmap(r"C:\Windows\System32\notepad.exe")
 	stickyWin.config(bg="green")
 	stickyWin.attributes('-topmost', True)
-	stickyWin.title("Sticky")
-	stickyWin.geometry("300x200")
-	stickyWin.maxsize(800, 500)
+	stickyWin.title(f"Sticky")
+	stickyWin.geometry("500x400")
+	stickyWin.maxsize(700, 500)
 
 	sticky_menu = Menu(root)
 	sticky_menu.add_command(label="Save", command=sticky_save)
@@ -453,14 +464,10 @@ def sticky(e=None):
 	stickyWin.config(menu=sticky_menu)
 
 	rytclk_menu = Menu(root, tearoff = 0, **args)
-	# rytclk_menu.add_command(label ="Cut")
-	# rytclk_menu.add_command(label ="Copy")
-	# rytclk_menu.add_command(label ="Paste")
-	# rytclk_menu.add_command(label ="Reload")
-	# rytclk_menu.add_separator()
 	rytclk_menu.add_command(label ="Command", command=lambda: more_opt(key_command))
+	rytclk_menu.add_command(label ="Switch Load 4", command=lambda: switch_load("sticky4444"))
 
-	area = Text(stickyWin, selectbackground="green")
+	area = Text(stickyWin, selectbackground="green", width=100, height=100)
 	sticky_load()
 	area.pack(pady=5, padx=5)
 
@@ -622,20 +629,6 @@ funcmenu.add_command(label="Shots Dir", command=lambda :startfile(r"C:\Users\PVE
 funcmenu.add_command(label="Save Shot Here", command=ss_here)
 funcmenu.add_separator()
 funcmenu.add_command(label="Skool", command=lambda :startfile(environ["skl"]))
-
-##############
-# passmenu = Menu(funcmenu, tearoff=0, **args)
-# # funcmenu.add_cascade(label="Passwords", menu=passmenu)
-# passmenu.add_command(label="English", command=lambda: pcopy("0BzyfA"))
-# scimenu = Menu(funcmenu, tearoff=0, **args)
-# passmenu.add_cascade(label="Science", menu=scimenu)
-# scimenu.add_command(label="Physics", command=lambda: pcopy("5Ae558"))
-# scimenu.add_command(label="Biology", command=lambda: pcopy("fgQ4qY"))
-# scimenu.add_command(label="Chemistry", command=lambda: pcopy("023703"))
-# passmenu.add_command(label="Social", command=lambda: pcopy("0udQfq"))
-# passmenu.add_command(label="Maths", command=lambda: pcopy("fddF1S"))
-# passmenu.add_command(label="Hindi", command=lambda: pcopy("10hindi"))
-################
 
 funcmenu.add_separator()
 ttl_changeMenu = Menu(funcmenu, tearoff=0, **args)
