@@ -9,10 +9,11 @@ from pyvda import AppView
 
 #### default funcs
 
+able_state=False
 def able():
 	global able_state
 	if b3["state"]==DISABLED:
-		root.title(f"Volume_Panel")
+		root.title(f"{firstword}_{lastword}")
 		b3.config(state=NORMAL)
 		b4.config(state=NORMAL)
 		b3.bind("<Enter>", lambda e: b3.config(background="lightgreen", foreground="black"))
@@ -21,6 +22,7 @@ def able():
 		b4.bind("<Leave>", lambda e: b4.config(background="green", foreground="white"))
 		b.bind(f"<Escape>", lambda e:scrn_move('e', side="left"))
 		b.bind(f"<`>", lambda e:scrn_move('e', side="right"))
+		able_state=True
 	else:
 		root.title(f"{firstword} {lastword}")
 		b3.config(state=DISABLED)
@@ -31,6 +33,7 @@ def able():
 		b4.unbind("<Leave>")
 		b.unbind("<`>")
 		b.unbind("<Escape>")
+		able_state=False
 
 def ss_here():
 	from tkinter.filedialog import asksaveasfile
@@ -62,7 +65,8 @@ def volume(e, side, times=1):
 
 def scrn_move(e, side="left"):
 	if side == "left":
-		media_pauseplay(togl=False, pspl=True)
+		random_title()
+		# media_pauseplay(togl=False, pspl=True)
 		# startfile(r'C:\ProgramData\Microsoft\Windows\Start Menu\Programs\HideVolumeOSD\Hide VolumeOSD.lnk')
 	elif side == "right":
 		pass
@@ -77,13 +81,17 @@ def scrnmove_mousewhell(e="None"):
 		pass
 		# startfile(r'C:\ProgramData\Microsoft\Windows\Start Menu\Programs\HideVolumeOSD\Hide VolumeOSD.lnk')
 	print(e)
+	random_title()
 
 def random_title(e=None):
 	global firstword
 	global lastword
 	firstword = choice(firstword_list)
 	lastword = choice(lastword_list)
-	root.title(f"{firstword} {lastword}")
+	if able_state:
+		root.title(f"{firstword}_{lastword}")
+	else:
+		root.title(f"{firstword} {lastword}")
 
 def manual_title(changing):
 	def ok_click(e=None):
@@ -390,23 +398,21 @@ def rpc():
 	rpcgui.mainloop()
 
 def sticky(e=None):
-	stickyfile="sticky"
 	def sticky_save(e=None):
 		appdata = environ["appdata"]
 		try:
 			makedirs(f"{appdata}\\VolumePanel\\data")
 		except FileExistsError:
 			pass
-		with open(f"{appdata}/VolumePanel/data/{stickyfile}.PVER", "wt") as f:
+		with open(f"{appdata}/VolumePanel/data/sticky.PVER", "wt") as f:
 			f.write(area.get(0.1, END).strip())
-		stickyWin.title(f"Sticky - {stickyfile}")
+		stickyWin.title("Sticky")
 
 	def sticky_load():
-		stickyWin.title(f"Sticky - {stickyfile}")
 		area.delete(1.0, END)
 		appdata = environ["appdata"]
-		if path.isfile(f"{appdata}/VolumePanel/data/{stickyfile}.PVER"):
-			with open(f"{appdata}/VolumePanel/data/{stickyfile}.PVER", "rt") as f:
+		if path.isfile(f"{appdata}/VolumePanel/data/sticky.PVER"):
+			with open(f"{appdata}/VolumePanel/data/sticky.PVER", "rt") as f:
 				area.insert(INSERT, f.read())
 				if area.get(1.0, END).strip() is "":
 					stickyWin.config(bg="white")
@@ -416,21 +422,18 @@ def sticky(e=None):
 		else:
 			showerror("Nope !!", "Sticky not saved to load")
 
-	def cmd_load():
-		pass
-
 	def sticky_close(e=None):
 		pcopy(area.get(0.1, END).strip())
 		stickyWin.destroy()
 
 	def unsaved_notice(e=None):
 		appdata = environ["appdata"]
-		if path.isfile(f"{appdata}/VolumePanel/data/{stickyfile}.PVER"):
-			with open(f"{appdata}/VolumePanel/data/{stickyfile}.PVER", "rt") as f:
+		if path.isfile(f"{appdata}/VolumePanel/data/sticky.PVER"):
+			with open(f"{appdata}/VolumePanel/data/sticky.PVER", "rt") as f:
 				if f.read() is area.get("0.0", END):
-					stickyWin.title(f"Sticky - {stickyfile}")
+					stickyWin.title("Sticky")
 				else:
-					stickyWin.title(f"** Sticky - {stickyfile}")
+					stickyWin.title("!! Sticky !!")
 
 	def do_popup(event):
 		try:
@@ -442,20 +445,14 @@ def sticky(e=None):
 		sticky_close()
 		func()
 
-	def switch_load(fname):
-		nonlocal stickyfile
-		print("Loaded", fname)
-		stickyfile=fname
-		sticky_load()
-
 
 	stickyWin = Toplevel(root)
 	stickyWin.iconbitmap(r"C:\Windows\System32\notepad.exe")
 	stickyWin.config(bg="green")
 	stickyWin.attributes('-topmost', True)
-	stickyWin.title(f"Sticky")
-	stickyWin.geometry("500x400")
-	stickyWin.maxsize(700, 500)
+	stickyWin.title("Sticky")
+	stickyWin.geometry("300x200")
+	stickyWin.maxsize(800, 500)
 
 	sticky_menu = Menu(root)
 	sticky_menu.add_command(label="Save", command=sticky_save)
@@ -464,10 +461,14 @@ def sticky(e=None):
 	stickyWin.config(menu=sticky_menu)
 
 	rytclk_menu = Menu(root, tearoff = 0, **args)
+	# rytclk_menu.add_command(label ="Cut")
+	# rytclk_menu.add_command(label ="Copy")
+	# rytclk_menu.add_command(label ="Paste")
+	# rytclk_menu.add_command(label ="Reload")
+	# rytclk_menu.add_separator()
 	rytclk_menu.add_command(label ="Command", command=lambda: more_opt(key_command))
-	rytclk_menu.add_command(label ="Switch Load 4", command=lambda: switch_load("sticky4444"))
 
-	area = Text(stickyWin, selectbackground="green", width=100, height=100)
+	area = Text(stickyWin, selectbackground="green")
 	sticky_load()
 	area.pack(pady=5, padx=5)
 
@@ -487,7 +488,8 @@ def media_pauseplay(e=None, togl=True, pspl=True):
 		if togl:
 			able()
 		else:
-			pass
+			print(Wm.wm_title(root)=="Volume_Panel" and togl)
+	random_title()
 
 def key_command(e=None):
 	valid_cmds=["sticky", "shots", "capture", "10mat", "pgms", "rpc"]
@@ -602,8 +604,8 @@ pixelVirtual = PhotoImage(width=1, height=1)
 args={"bg":"green" ,"fg":"white", "activebackground":"lightgreen", "activeforeground":"black"}
 btnargs={"bg":"green", "fg":"white", "activebackground":"darkgreen", "activeforeground":"lightgreen"
 		, "disabledforeground":"white", "compound":"c", 'image':pixelVirtual}
-firstword_list = ["Volume", "Sound", "Voice", "Noise", "ஒலி", "கூச்சல்", "குரல்", "आवाज़", "कोलाहल", "ध्वनि", "आयतन", "ஏடு"]
-lastword_list = ["Panel", "Box", "Corner", "Control", "पैनल", "संदूक", "कोना", "नियंत्रण", "சேணவகை", "பெட்டி", "மூலை", "கட்டுப்பாடு"]
+firstword_list = ["Volume", "Sound", "Voice", "Noise", "Audio", "This", "That", "The", "Green", "My", "Tone", "Sonics", "Acoustics", "Vibe", "Reverb", "Echo"]
+lastword_list = ["Panel", "Box", "Corner", "Control", "Adjuster", "Board", "Unit", "Thing", "App", "Assist", "Waver", "Console", "Interface", "Menu", "System"]
 
 random_title()
 # print(choice(firstword_list))
@@ -694,8 +696,8 @@ def bind_default():
 	b2.bind("<a>", lambda e:volume(None, side="up", times=2)) # doubleup
 	b2.bind("<q>", lambda e:able()) # shutup
 	# b2.bind(f"<`>", lambda e:p.hotkey('ctrl', 'win', f'right')) ######### Temply off
-	b2.bind(f"<.>", lambda e:scrn_move('e', side="right"))
-	b2.bind(f"<,>", lambda e:scrn_move('e', side="left"))
+	b2.bind(f"<Right>", lambda e:scrn_move('e', side="right"))
+	b2.bind(f"<Left>", lambda e:scrn_move('e', side="left"))
 	# b2.bind(f"<Escape>", lambda e:scrn_move('e', side="left")) ######### Temply off
 
 	b3.bind("<Key>", lambda e:scrn_move('e', side="left"))
