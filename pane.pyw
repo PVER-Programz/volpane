@@ -9,10 +9,11 @@ from pyvda import AppView
 
 #### default funcs
 
+able_state=False
 def able():
 	global able_state
 	if b3["state"]==DISABLED:
-		root.title(f"Volume_Panel")
+		root.title(f"{firstword}_{lastword}")
 		b3.config(state=NORMAL)
 		b4.config(state=NORMAL)
 		b3.bind("<Enter>", lambda e: b3.config(background="lightgreen", foreground="black"))
@@ -21,6 +22,7 @@ def able():
 		b4.bind("<Leave>", lambda e: b4.config(background="green", foreground="white"))
 		b.bind(f"<Escape>", lambda e:scrn_move('e', side="left"))
 		b.bind(f"<`>", lambda e:scrn_move('e', side="right"))
+		able_state=True
 	else:
 		root.title(f"{firstword} {lastword}")
 		b3.config(state=DISABLED)
@@ -31,6 +33,7 @@ def able():
 		b4.unbind("<Leave>")
 		b.unbind("<`>")
 		b.unbind("<Escape>")
+		able_state=False
 
 def ss_here():
 	from tkinter.filedialog import asksaveasfile
@@ -62,7 +65,8 @@ def volume(e, side, times=1):
 
 def scrn_move(e, side="left"):
 	if side == "left":
-		media_pauseplay(togl=False, pspl=True)
+		random_title()
+		# media_pauseplay(togl=False, pspl=True)
 		# startfile(r'C:\ProgramData\Microsoft\Windows\Start Menu\Programs\HideVolumeOSD\Hide VolumeOSD.lnk')
 	elif side == "right":
 		pass
@@ -77,13 +81,17 @@ def scrnmove_mousewhell(e="None"):
 		pass
 		# startfile(r'C:\ProgramData\Microsoft\Windows\Start Menu\Programs\HideVolumeOSD\Hide VolumeOSD.lnk')
 	print(e)
+	random_title()
 
 def random_title(e=None):
 	global firstword
 	global lastword
 	firstword = choice(firstword_list)
 	lastword = choice(lastword_list)
-	root.title(f"{firstword} {lastword}")
+	if able_state:
+		root.title(f"{firstword}_{lastword}")
+	else:
+		root.title(f"{firstword} {lastword}")
 
 def manual_title(changing):
 	def ok_click(e=None):
@@ -480,7 +488,8 @@ def media_pauseplay(e=None, togl=True, pspl=True):
 		if togl:
 			able()
 		else:
-			pass
+			print(Wm.wm_title(root)=="Volume_Panel" and togl)
+	random_title()
 
 def key_command(e=None):
 	valid_cmds=["sticky", "shots", "capture", "10mat", "pgms", "rpc"]
@@ -595,8 +604,8 @@ pixelVirtual = PhotoImage(width=1, height=1)
 args={"bg":"green" ,"fg":"white", "activebackground":"lightgreen", "activeforeground":"black"}
 btnargs={"bg":"green", "fg":"white", "activebackground":"darkgreen", "activeforeground":"lightgreen"
 		, "disabledforeground":"white", "compound":"c", 'image':pixelVirtual}
-firstword_list = ["Volume", "Sound", "Voice", "Noise", "ஒலி", "கூச்சல்", "குரல்", "आवाज़", "कोलाहल", "ध्वनि", "आयतन", "ஏடு"]
-lastword_list = ["Panel", "Box", "Corner", "Control", "पैनल", "संदूक", "कोना", "नियंत्रण", "சேணவகை", "பெட்டி", "மூலை", "கட்டுப்பாடு"]
+firstword_list = ["Volume", "Sound", "Voice", "Noise", "Audio", "This", "That", "The", "Green", "My", "Tone", "Sonics", "Acoustics", "Vibe", "Reverb", "Echo"]
+lastword_list = ["Panel", "Box", "Corner", "Control", "Adjuster", "Board", "Unit", "Thing", "App", "Assist", "Waver", "Console", "Interface", "Menu", "System"]
 
 random_title()
 # print(choice(firstword_list))
@@ -687,8 +696,8 @@ def bind_default():
 	b2.bind("<a>", lambda e:volume(None, side="up", times=2)) # doubleup
 	b2.bind("<q>", lambda e:able()) # shutup
 	# b2.bind(f"<`>", lambda e:p.hotkey('ctrl', 'win', f'right')) ######### Temply off
-	b2.bind(f"<.>", lambda e:scrn_move('e', side="right"))
-	b2.bind(f"<,>", lambda e:scrn_move('e', side="left"))
+	b2.bind(f"<Right>", lambda e:scrn_move('e', side="right"))
+	b2.bind(f"<Left>", lambda e:scrn_move('e', side="left"))
 	# b2.bind(f"<Escape>", lambda e:scrn_move('e', side="left")) ######### Temply off
 
 	b3.bind("<Key>", lambda e:scrn_move('e', side="left"))
