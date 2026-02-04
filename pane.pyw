@@ -4,6 +4,7 @@ from pyperclip import copy as pcopy
 from os import startfile, makedirs, environ, path
 from tkinter.messagebox import showinfo, showerror
 from tkinter.simpledialog import askstring
+import ctypes
 from random import choice
 from pyvda import AppView
 
@@ -137,10 +138,12 @@ def rpc():
 	from pypresence import Presence
 	from time import time as now
 	import json
-
-	terminal.destroy()
+	try:
+		terminal.destroy()
+	except NameError:
+		print("RPC opened from menu")
 	rpcgui = Toplevel(root)
-	rpcgui.iconbitmap(r"C:\Users\PVER\AppData\Local\Discord/app.ico")
+	rpcgui.iconbitmap(r"C:\Users\DELL\AppData\Local\Discord/app.ico")
 	rpcgui.title("RPC Editor")
 	rpcgui.config(bg="green")
 
@@ -479,6 +482,20 @@ def sticky(e=None):
 
 	stickyWin.mainloop()
 
+
+def mouse_switch(e=None):
+	user32 = ctypes.WinDLL("user32", use_last_error=True)
+	current_state = user32.GetSystemMetrics(23)  # SM_SWAPBUTTON = 23
+	new_state = 0 if current_state else 1
+	user32.SwapMouseButton(new_state)
+	if new_state:
+		print("✅ Mouse buttons swapped: Right button is now primary.")
+		root.title('Right mouse')
+	else:
+		print("✅ Mouse buttons restored: Left button is now primary.")
+		root.title('Left mouse')
+
+
 def media_pauseplay(e=None, togl=True, pspl=True):
 	if pspl:
 		p.press("playpause")
@@ -492,30 +509,18 @@ def media_pauseplay(e=None, togl=True, pspl=True):
 	random_title()
 
 def key_command(e=None):
-	valid_cmds=["sticky", "shots", "capture", "10mat", "pgms", "rpc"]
+	valid_cmds=["sticky", "shots", "capture", "run ..", "tf/th/tr", "rpc"]
 	def run_click(e=None):
 		try:
 			cmdline = inp_cmd.get()
-			if mvs[:-1] in cmdline:
-				if "more" in cmdline:
-					try:
-						startfile(f"D:/{mvs}/More.lnk")
-					except:
-						startfile(f"{ws[2]}://{ws[1]}free.{ws[0]}")
-				elif "watched" in cmdline:
-					startfile(f"D:/{mvs}/")
-				elif "archive" in cmdline:
-					startfile(f"D:/{mvs}/archived")
-				else:
-					startfile(f"D:/{mvs}")
-			if "sticky" in cmdline:
+			if "sticky" == cmdline:
 				terminal.destroy()
 				sticky()
-			if "rpc" in cmdline:
+			if "rpc" == cmdline:
 				rpc()
-			if "shot" in cmdline:
-				startfile(r"C:\Users\PVER\OneDrive\Pictures\Screenshots")
-			if "capture" in cmdline:
+			if "shots" == cmdline:
+				startfile(r"C:\Users\DELL\OneDrive\Pictures\Screenshots")
+			if "capture" == cmdline:
 				ss_here()
 			if len(cmdline)==2:
 				if "tf" == cmdline:
@@ -524,18 +529,6 @@ def key_command(e=None):
 					manual_title("hindword")
 				elif "tr" == cmdline:
 					random_title()
-			if "10mat" in cmdline:
-				startfile(environ['10mat'])
-			if ("pgms" in cmdline) or ("programs" in cmdline) or ("programfiles" in cmdline):
-				startfile(environ['pgms'])
-			if cmdline[:4] == "game":
-				if "on" in cmdline:
-					bind_gm(None)
-				elif "off" in cmdline:
-					unbind_gm(None)
-				else:
-					gm = choice([bind_gm, unbind_gm])
-					gm(None)
 			if cmdline[:3] == "run":
 				startfile(cmdline[4:])
 		except Exception as errorLine:
@@ -604,8 +597,8 @@ pixelVirtual = PhotoImage(width=1, height=1)
 args={"bg":"green" ,"fg":"white", "activebackground":"lightgreen", "activeforeground":"black"}
 btnargs={"bg":"green", "fg":"white", "activebackground":"darkgreen", "activeforeground":"lightgreen"
 		, "disabledforeground":"white", "compound":"c", 'image':pixelVirtual}
-firstword_list = ["Volume", "Sound", "Voice", "Noise", "Audio", "This", "That", "The", "Green", "My", "Tone", "Sonics", "Acoustics", "Vibe", "Reverb", "Echo"]
-lastword_list = ["Panel", "Box", "Corner", "Control", "Adjuster", "Board", "Unit", "Thing", "App", "Assist", "Waver", "Console", "Interface", "Menu", "System"]
+firstword_list = ["Volume", "Sound", "Voice", "Noise", "Audio", "This", "That", "The", "A", "Green", "My", "Tone", "Sonics", "Acoustics", "Vibe", "Reverb", "Echo", "Speaker"]
+lastword_list = ["Panel", "Box", "Corner", "Control", "Adjuster", "Board", "Unit", "Thing", "App", "Assister", "Waver", "Console", "Interface", "Menu", "System", "Window", "Stuff"]
 
 random_title()
 # print(choice(firstword_list))
@@ -617,20 +610,22 @@ random_title()
 menubar = Menu(root)
 volmenu = Menu(menubar, tearoff=0, **args)
 volmenu.add_command(label="Increase", command=lambda :volume(None, side="up", times=1))
-volmenu.add_command(label="Double Increase", command=lambda :volume(None, side="up", times=2))
+volmenu.add_command(label="Next track", command=lambda :p.press('nexttrack'))
 volmenu.add_separator()
 volmenu.add_command(label="Decrease", command=lambda :volume(None, side="down", times=1))
-volmenu.add_command(label="Double Decrease", command=lambda :volume(None, side="down", times=2))
+volmenu.add_command(label="Prev track", command=lambda :p.press('prevtrack'))
 volmenu.add_separator()
-volmenu.add_command(label="Mute", command=lambda: p.press("volumemute"))
+# volmenu.add_command(label="Mute", command=lambda: p.press("volumemute"))
+volmenu.add_command(label="RPC", command=rpc)
+volmenu.add_command(label="Key command", command=key_command)
 volmenu.add_separator()
-volmenu.add_command(label="Sound Vol", command=lambda: startfile("sndvol"))
+volmenu.add_command(label="SndVol Panel", command=lambda: startfile("sndvol"))
 
 funcmenu = Menu(menubar, tearoff=0, **args)
-funcmenu.add_command(label="Shots Dir", command=lambda :startfile(r"C:\Users\PVER\OneDrive\Pictures\Screenshots"))
+funcmenu.add_command(label="Shots Dir", command=lambda :startfile(r"C:\Users\DELL\OneDrive\Pictures\Screenshots"))
 funcmenu.add_command(label="Save Shot Here", command=ss_here)
 funcmenu.add_separator()
-funcmenu.add_command(label="Skool", command=lambda :startfile(environ["skl"]))
+funcmenu.add_command(label="Skool", command=lambda :startfile("c:/Users/"+environ["username"]+r"\OneDrive\LenovoBackup\Dtop_1drv\Skool"))
 
 funcmenu.add_separator()
 ttl_changeMenu = Menu(funcmenu, tearoff=0, **args)
@@ -641,6 +636,7 @@ ttl_changeMenu.add_command(label="Set fore-word", command=lambda: manual_title("
 ttl_changeMenu.add_command(label="Set hind-word", command=lambda: manual_title("hindword"))
 
 funcmenu.add_command(label="Sticky", command=sticky)
+funcmenu.add_command(label="Mouse Switch", command=mouse_switch)
 
 menubar.add_cascade(label="Volume", menu=volmenu)
 menubar.add_command(label="Quick Shot", command=lambda: p.press("prntscrn"))
@@ -679,6 +675,8 @@ root.bind("<End>", lambda e:AppView.current().unpin())
 root.bind("<Configure>", adjust)
 root.bind("<MouseWheel>", scrnmove_mousewhell)
 root.bind("<Double-Delete>", malert)
+
+root.bind("<App>", mouse_switch)
 # root.bind("<MouseWheel>", lambda e:p.hotkey('ctrl', 'win', "left"))
 
 #### Default bindings
